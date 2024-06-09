@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndexedDB Example</title>
+</head>
+
+<body>
+    <script>
+        const request = indexedDB.open('myDatabase', 1);
+
+        request.onerror = (event) => {
+            console.error('Database error:', event.target.error);
+        };
+
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            const transaction = db.transaction('myStore', 'readwrite');
+
+            transaction.onerror = (event) => {
+                console.error('Transaction error:', event.target.error);
+            };
+            const store = transaction.objectStore('myStore');
+
+
+            const data = [
+                { id: 1, color: 'red' },
+                { id: 2, color: 'blue' },
+                { id: 3, color: 'green' },
+                { id: 4, color: 'yellow' }
+            ];
+
+            data.forEach(item => store.put(item));
+
+        };
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('myStore')) {
+                const store = db.createObjectStore('myStore', { keyPath: 'id' });
+                store.createIndex('color', 'color', { unique: false });
+            }
+
+        };
+        transaction.oncomplete = () => {
+            console.log('Transaction completed successfully');
+        };
+    </script>
+</body>
+
+</html>
